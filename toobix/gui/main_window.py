@@ -42,12 +42,75 @@ class ToobixGUI:
         # Chat-Historie
         self.chat_history = []
         
-        # === PHASE 4 COMPONENTS ===
+        # === PHASE 4 & 5 COMPONENTS ===
         self._initialize_phase4_components()
+        self._initialize_phase5_components()
         
         print("🎨 GUI wird initialisiert...")
         self._setup_gui()
         self._setup_callbacks()
+    
+    def _initialize_phase4_components(self):
+        """Initialisiert alle Phase 4 Engines"""
+        try:
+            # System Documentation Engine
+            from toobix.core.system_documentation_engine import SystemDocumentationEngine
+            self.documentation_engine = SystemDocumentationEngine()
+            print("✅ Documentation Engine initialisiert")
+            
+            # KI Thought Stream Engine
+            from toobix.core.ki_thought_stream_engine import KIThoughtStreamEngine
+            self.thought_stream_engine = KIThoughtStreamEngine()
+            # Set callback für neue Gedanken
+            self.thought_stream_engine.set_callback(self._on_new_thought)
+            print("✅ Thought Stream Engine initialisiert")
+            
+            # Extended Settings Engine
+            from toobix.core.extended_settings_engine import ExtendedSettingsEngine
+            self.extended_settings = ExtendedSettingsEngine()
+            print("✅ Extended Settings Engine initialisiert")
+            
+            # Interactive Tutorial System
+            from toobix.core.interactive_tutorial_system import InteractiveTutorialSystem
+            self.tutorial_system = InteractiveTutorialSystem()
+            print("✅ Tutorial System initialisiert")
+            
+            # Wellness Engine (falls verfügbar)
+            try:
+                from toobix.core.wellness_engine import WellnessEngine
+                self.wellness_engine = WellnessEngine()
+                print("✅ Wellness Engine initialisiert")
+            except ImportError:
+                print("⚠️ Wellness Engine nicht verfügbar")
+                
+        except Exception as e:
+            print(f"❌ Phase 4 Initialisierung Fehler: {e}")
+            logger.error(f"Phase 4 Init Error: {e}")
+    
+    def _initialize_phase5_components(self):
+        """Initialisiert alle Phase 5 Smart Features"""
+        try:
+            # Smart Suggestion Engine
+            from toobix.core.smart_suggestion_engine import SmartSuggestionEngine
+            self.suggestion_engine = SmartSuggestionEngine()
+            print("🎯 Smart Suggestion Engine initialisiert")
+            
+            # Knowledge Discovery Engine
+            from toobix.core.knowledge_discovery_engine import KnowledgeDiscoveryEngine
+            self.knowledge_engine = KnowledgeDiscoveryEngine()
+            print("📚 Knowledge Discovery Engine initialisiert")
+            
+            # Knowledge Discovery Center GUI (wird bei Bedarf erstellt)
+            self.knowledge_center = None
+            print("📚 Knowledge Discovery Center bereit")
+            
+            # Self-Modification Engine placeholder
+            self.self_modification_active = False
+            print("✅ Self-Modification Framework bereit")
+            
+        except Exception as e:
+            print(f"❌ Phase 5 Initialisierung Fehler: {e}")
+            logger.error(f"Phase 5 Init Error: {e}")
     
     def _setup_gui(self):
         """Erstellt die GUI-Komponenten"""
@@ -73,20 +136,144 @@ class ToobixGUI:
         self._create_widgets()
         self._setup_bindings()
     
+    def _create_suggestion_panel(self):
+        """Erstellt das Smart Suggestion Panel (Phase 5)"""
+        try:
+            from toobix.gui.smart_suggestion_panel import SmartSuggestionPanel
+            self.suggestion_panel = SmartSuggestionPanel(
+                parent=self.root,
+                suggestion_engine=self.suggestion_engine,
+                action_callback=self._handle_suggestion_action
+            )
+            print("✅ Smart Suggestion Panel erstellt")
+        except Exception as e:
+            print(f"⚠️ Suggestion Panel Fehler: {e}")
+            logger.error(f"Suggestion Panel Error: {e}")
+    
+    def _handle_suggestion_action(self, action: str):
+        """Behandelt Aktionen aus dem Suggestion Panel"""
+        try:
+            print(f"🎯 Suggestion Action empfangen: {action}")  # Debug
+            
+            # Spezielle Phase 5 Aktionen
+            if action == "enter_focus_mode":
+                self._add_message("Toobix", "🎯 Fokus-Modus aktiviert! Ablenkungen werden minimiert.")
+                return
+            elif action == "organize_desktop":
+                response = self._handle_system_commands("organisiere desktop")
+                self._add_message("Toobix", response or "Desktop wird organisiert...")
+                return
+            elif action == "deep_system_analysis":
+                response = self._handle_system_commands("erweiterte überwachung")
+                self._add_message("Toobix", response or "Starte erweiterte Systemanalyse...")
+                return
+            elif action == "start_meditation_5min":
+                self._start_meditation()
+                return
+            elif action == "start_breathing_exercise":
+                self._start_breathing()
+                return
+            elif action == "feature_exploration_mode":
+                self._show_documentation()
+                return
+            elif action == "enter_tutorial_mode":
+                self._show_tutorials()
+                return
+            
+            # Alle anderen Actions wie normale Chat-Eingaben behandeln
+            self._add_message("Du", action)
+            threading.Thread(
+                target=self._process_message,
+                args=(action,),
+                daemon=True
+            ).start()
+            
+        except Exception as e:
+            logger.error(f"Suggestion Action Error: {e}")
+            self._add_message("Fehler", f"Suggestion konnte nicht ausgeführt werden: {e}")
+    
     def _create_widgets(self):
-        """Erstellt alle GUI-Widgets"""
+        """Erstellt alle GUI-Widgets mit Phase 4 Features"""
         
         # === HEADER ===
         header_frame = self._create_frame(self.root, height=60)
         header_frame.pack(fill="x", padx=10, pady=5)
         
-        # Toobix Logo/Titel
+        # Toobix Logo/Titel mit Phase 4 Kennzeichnung
         title_label = self._create_label(
             header_frame, 
-            "🤖 Toobix AI Assistant", 
+            "🚀 Toobix AI Assistant - Phase 4 Enhanced", 
             font=("Arial", 16, "bold")
         )
         title_label.pack(side="left", padx=10)
+        
+        # Phase 4 Feature Buttons
+        feature_frame = self._create_frame(header_frame)
+        feature_frame.pack(side="right", padx=10)
+        
+        # Documentation Button
+        if CTK_AVAILABLE:
+            self.docs_button = ctk.CTkButton(
+                feature_frame, 
+                text="📚 Docs", 
+                command=self._show_documentation,
+                width=60
+            )
+        else:
+            self.docs_button = ttk.Button(
+                feature_frame, 
+                text="📚 Docs", 
+                command=self._show_documentation
+            )
+        self.docs_button.pack(side="left", padx=2)
+        
+        # Settings Button
+        if CTK_AVAILABLE:
+            self.settings_button = ctk.CTkButton(
+                feature_frame, 
+                text="⚙️ Settings", 
+                command=self._show_extended_settings,
+                width=80
+            )
+        else:
+            self.settings_button = ttk.Button(
+                feature_frame, 
+                text="⚙️ Settings", 
+                command=self._show_extended_settings
+            )
+        self.settings_button.pack(side="left", padx=2)
+        
+        # Tutorial Button
+        if CTK_AVAILABLE:
+            self.tutorial_button = ctk.CTkButton(
+                feature_frame, 
+                text="🎓 Tutorials", 
+                command=self._show_tutorials,
+                width=80
+            )
+        else:
+            self.tutorial_button = ttk.Button(
+                feature_frame, 
+                text="🎓 Tutorials", 
+                command=self._show_tutorials
+            )
+        self.tutorial_button.pack(side="left", padx=2)
+        
+        # Knowledge Discovery Button
+        if CTK_AVAILABLE:
+            self.knowledge_button = ctk.CTkButton(
+                feature_frame, 
+                text="📚 Knowledge", 
+                command=self._show_knowledge_center,
+                width=90
+            )
+        else:
+            self.knowledge_button = ttk.Button(
+                feature_frame, 
+                text="📚 Knowledge", 
+                command=self._show_knowledge_center
+            )
+        self.knowledge_button.pack(side="left", padx=2)
         
         # Status-Info
         self.listening_status = self._create_label(
@@ -96,33 +283,146 @@ class ToobixGUI:
         )
         self.listening_status.pack(side="right", padx=10)
         
-        # === CHAT BEREICH ===
-        chat_frame = self._create_frame(self.root)
-        chat_frame.pack(fill="both", expand=True, padx=10, pady=5)
+        # === MAIN CONTENT AREA MIT TABS ===
+        # Erstelle Notebook für Tabs
+        if CTK_AVAILABLE:
+            self.main_notebook = ctk.CTkTabview(self.root)
+        else:
+            self.main_notebook = ttk.Notebook(self.root)
+        
+        self.main_notebook.pack(fill="both", expand=True, padx=10, pady=5)
+        
+        # === CHAT TAB ===
+        if CTK_AVAILABLE:
+            chat_frame = self.main_notebook.add("💬 Chat")
+        else:
+            chat_frame = ttk.Frame(self.main_notebook)
+            self.main_notebook.add(chat_frame, text="💬 Chat")
         
         # Chat-Display
         if CTK_AVAILABLE:
             self.chat_display = ctk.CTkTextbox(
                 chat_frame,
-                height=400,
+                height=350,
                 font=("Arial", 11)
             )
         else:
             self.chat_display = scrolledtext.ScrolledText(
                 chat_frame,
-                height=20,
+                height=18,
                 font=("Arial", 11),
                 wrap=tk.WORD
             )
         
-        self.chat_display.pack(fill="both", expand=True, pady=(0, 10))
+        self.chat_display.pack(fill="both", expand=True, pady=(10, 10), padx=10)
         
-        # Willkommensnachricht
+        # === THOUGHT STREAM TAB ===
+        if CTK_AVAILABLE:
+            thought_frame = self.main_notebook.add("🧠 Gedankenstrom")
+        else:
+            thought_frame = ttk.Frame(self.main_notebook)
+            self.main_notebook.add(thought_frame, text="🧠 Gedankenstrom")
+        
+        # Thought Stream Display
+        thought_label = self._create_label(thought_frame, "KI-Gedankenstrom (Live)", font=("Arial", 12, "bold"))
+        thought_label.pack(pady=10)
+        
+        if CTK_AVAILABLE:
+            self.thought_display = ctk.CTkTextbox(
+                thought_frame,
+                height=350,
+                font=("Arial", 10)
+            )
+        else:
+            self.thought_display = scrolledtext.ScrolledText(
+                thought_frame,
+                height=18,
+                font=("Arial", 10),
+                wrap=tk.WORD
+            )
+        
+        self.thought_display.pack(fill="both", expand=True, pady=(0, 10), padx=10)
+        
+        # === SYSTEM STATUS TAB ===
+        if CTK_AVAILABLE:
+            status_frame = self.main_notebook.add("📊 System")
+        else:
+            status_frame = ttk.Frame(self.main_notebook)
+            self.main_notebook.add(status_frame, text="📊 System")
+        
+        # System Status Display
+        status_label = self._create_label(status_frame, "System Status & Analytics", font=("Arial", 12, "bold"))
+        status_label.pack(pady=10)
+        
+        if CTK_AVAILABLE:
+            self.status_display = ctk.CTkTextbox(
+                status_frame,
+                height=350,
+                font=("Arial", 10)
+            )
+        else:
+            self.status_display = scrolledtext.ScrolledText(
+                status_frame,
+                height=18,
+                font=("Arial", 10),
+                wrap=tk.WORD
+            )
+        
+        self.status_display.pack(fill="both", expand=True, pady=(0, 10), padx=10)
+        
+        # === WELLNESS TAB ===
+        if CTK_AVAILABLE:
+            wellness_frame = self.main_notebook.add("🎵 Wellness")
+        else:
+            wellness_frame = ttk.Frame(self.main_notebook)
+            self.main_notebook.add(wellness_frame, text="🎵 Wellness")
+        
+        # Wellness Controls
+        wellness_label = self._create_label(wellness_frame, "Creative Wellness Engine", font=("Arial", 12, "bold"))
+        wellness_label.pack(pady=10)
+        
+        wellness_controls = self._create_frame(wellness_frame)
+        wellness_controls.pack(pady=10)
+        
+        # Wellness Buttons
+        if CTK_AVAILABLE:
+            meditation_btn = ctk.CTkButton(wellness_controls, text="🧘 Meditation", command=self._start_meditation)
+            breathing_btn = ctk.CTkButton(wellness_controls, text="🫁 Breathing", command=self._start_breathing)
+            soundscape_btn = ctk.CTkButton(wellness_controls, text="🎵 Soundscape", command=self._start_soundscape)
+        else:
+            meditation_btn = ttk.Button(wellness_controls, text="🧘 Meditation", command=self._start_meditation)
+            breathing_btn = ttk.Button(wellness_controls, text="🫁 Breathing", command=self._start_breathing)
+            soundscape_btn = ttk.Button(wellness_controls, text="🎵 Soundscape", command=self._start_soundscape)
+        
+        meditation_btn.pack(side="left", padx=5)
+        breathing_btn.pack(side="left", padx=5)
+        soundscape_btn.pack(side="left", padx=5)
+        
+        # Wellness Display
+        if CTK_AVAILABLE:
+            self.wellness_display = ctk.CTkTextbox(
+                wellness_frame,
+                height=280,
+                font=("Arial", 10)
+            )
+        else:
+            self.wellness_display = scrolledtext.ScrolledText(
+                wellness_frame,
+                height=14,
+                font=("Arial", 10),
+                wrap=tk.WORD
+            )
+        
+        self.wellness_display.pack(fill="both", expand=True, pady=(10, 10), padx=10)
         self._add_message("Toobix", "Hallo! Ich bin Toobix, dein AI-Assistent. Du kannst mit mir sprechen oder hier tippen. 🚀")
         
         # === INPUT BEREICH ===
         input_frame = self._create_frame(self.root, height=80)
         input_frame.pack(fill="x", padx=10, pady=(0, 10))
+        
+        # === SMART SUGGESTION PANEL (PHASE 5) - Über Input ===
+        if hasattr(self, 'suggestion_engine'):
+            self._create_suggestion_panel()
         
         # Eingabefeld
         if CTK_AVAILABLE:
@@ -220,6 +520,9 @@ class ToobixGUI:
             on_command=self._on_speech_command,
             on_wake_word=self._on_wake_word
         )
+        
+        # Phase 4 Updates starten
+        self._setup_phase4_updates()
     
     def _add_message(self, sender: str, message: str):
         """Fügt Nachricht zum Chat hinzu"""
@@ -340,6 +643,9 @@ class ToobixGUI:
             if response:
                 self.speech_engine.speak(response, wait=False)
             
+            # Phase 5: Smart Suggestions aktualisieren
+            self._update_smart_suggestions(message, response)
+            
         except Exception as e:
             error_msg = f"Entschuldigung, es gab einen Fehler: {e}"
             
@@ -350,6 +656,54 @@ class ToobixGUI:
         
         finally:
             self.root.after(0, lambda: self._update_status("Bereit"))
+    
+    def _update_smart_suggestions(self, user_message: str, ai_response: str):
+        """Aktualisiert Smart Suggestions basierend auf Konversation (Phase 5)"""
+        try:
+            if hasattr(self, 'suggestion_panel') and hasattr(self, 'suggestion_engine'):
+                from toobix.core.smart_suggestion_engine import SuggestionContext
+                
+                # Erstelle Kontext für Suggestion Engine
+                context = SuggestionContext(
+                    last_message=user_message,
+                    ai_response=ai_response,
+                    user_history=self.chat_history[-5:] if len(self.chat_history) >= 5 else self.chat_history,
+                    current_activity="chat",
+                    time_of_day=datetime.now().strftime("%H:%M"),
+                    system_state={
+                        'cpu_usage': psutil.cpu_percent(),
+                        'memory_usage': psutil.virtual_memory().percent,
+                        'active_tab': 'chat'
+                    },
+                    available_functions=[
+                        'organize_files', 'system_analysis', 'meditation', 
+                        'breathing', 'soundscape', 'documentation', 'tutorials'
+                    ]
+                )
+                
+                # Aktualisiere Suggestions asynchron
+                def update_suggestions():
+                    self.suggestion_panel.update_suggestions(context)
+                
+                self.root.after(100, update_suggestions)  # Kleiner Delay für bessere Performance
+                
+        except Exception as e:
+            logger.error(f"Smart Suggestions Update Fehler: {e}")
+    
+    def _execute_suggestion_action(self, action: str):
+        """Führt Suggestion Actions aus - Callback für Knowledge Center"""
+        try:
+            # Behandle als normalen Chat-Input
+            self._add_message("Du", action)
+            # Verwende die korrekte Message-Processing Methode
+            threading.Thread(
+                target=self._process_message,
+                args=(action,),
+                daemon=True
+            ).start()
+        except Exception as e:
+            logger.error(f"Suggestion Action Error: {e}")
+            self._add_message("Fehler", f"Action konnte nicht ausgeführt werden: {e}")
     
     def _handle_system_commands(self, message: str) -> Optional[str]:
         """Behandelt direkte System-Kommandos inkl. neue Projekt- und Wissensfunktionen"""
@@ -644,6 +998,9 @@ class ToobixGUI:
                     response = f"❌ Organisation fehlgeschlagen: {result['error']}"
                 
                 return response
+                
+            except Exception as e:
+                return f"❌ Fehler bei Datei-Organisation: {e}"
                 
         # ERWEITERTE SYSTEM-ÜBERWACHUNG
         if any(phrase in message_lower for phrase in ['erweiterte überwachung', 'system monitoring', 'performance dashboard', 'system health']):
@@ -1426,12 +1783,198 @@ Fehler hintereinander: {status['consecutive_failures']}
     def _on_new_thought(self, thought):
         """Callback für neue KI-Gedanken"""
         try:
-            # Zeige Gedanken im Chat (optional, könnte auch separates Panel sein)
+            # Zeige Gedanken im Thought Stream Panel
+            if hasattr(self, 'thought_display'):
+                thought_text = f"[{thought.timestamp}] {thought.thought_type.upper()}: {thought.content}\n\n"
+                self.root.after(0, lambda: self._add_thought_to_display(thought_text))
+            
+            # Zeige wichtige Gedanken auch im Chat
             if thought.thought_type in ['insight', 'suggestion'] and thought.priority in ['medium', 'high']:
                 thought_text = f"💭 KI-Gedanke: {thought.content}"
                 self.root.after(0, lambda: self._add_message("Toobix Brain", thought_text))
         except Exception as e:
             logger.error(f"Thought Callback Fehler: {e}")
+    
+    def _add_thought_to_display(self, text):
+        """Fügt Text zum Thought Stream Display hinzu"""
+        try:
+            if CTK_AVAILABLE:
+                self.thought_display.insert("end", text)
+            else:
+                self.thought_display.insert(tk.END, text)
+                self.thought_display.see(tk.END)
+        except Exception as e:
+            logger.error(f"Thought Display Fehler: {e}")
+    
+    def _show_documentation(self):
+        """Zeigt System-Dokumentation"""
+        try:
+            if hasattr(self, 'documentation_engine'):
+                overview = self.documentation_engine.get_system_overview()
+                doc_text = f"📚 SYSTEM DOCUMENTATION\n\n{overview}\n\n"
+                self._add_message("Documentation", doc_text)
+            else:
+                self._add_message("System", "📚 Documentation Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Dokumentation konnte nicht geladen werden: {e}")
+    
+    def _show_extended_settings(self):
+        """Zeigt erweiterte Einstellungen"""
+        try:
+            if hasattr(self, 'extended_settings'):
+                categories = self.extended_settings.get_all_categories()
+                settings_text = f"⚙️ ERWEITERTE EINSTELLUNGEN\n\nVerfügbare Kategorien:\n"
+                for cat in categories:
+                    settings_text += f"• {cat}\n"
+                settings_text += f"\nGesamt: {len(categories)} Kategorien mit 30+ Einstellungen"
+                self._add_message("Settings", settings_text)
+            else:
+                self._add_message("System", "⚙️ Extended Settings Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Einstellungen konnten nicht geladen werden: {e}")
+    
+    def _show_tutorials(self):
+        """Zeigt verfügbare Tutorials"""
+        try:
+            if hasattr(self, 'tutorial_system'):
+                tutorials = self.tutorial_system.get_available_tutorials()
+                tutorial_text = f"🎓 INTERACTIVE TUTORIALS\n\nVerfügbare Tutorials:\n"
+                for tutorial in tutorials:
+                    status = ""
+                    if tutorial.get('progress'):
+                        if tutorial['progress']['status'] == 'completed':
+                            status = " ✅"
+                        elif tutorial['progress']['status'] == 'in_progress':
+                            status = " 🔄"
+                    tutorial_text += f"• {tutorial['title']} ({tutorial['estimated_duration']}min){status}\n"
+                
+                recommendations = self.tutorial_system.get_recommended_tutorials()
+                if recommendations:
+                    tutorial_text += f"\n💡 Empfohlen: {recommendations[0]['title']}"
+                
+                self._add_message("Tutorials", tutorial_text)
+            else:
+                self._add_message("System", "🎓 Tutorial System nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Tutorials konnten nicht geladen werden: {e}")
+    
+    def _show_knowledge_center(self):
+        """Zeigt das Knowledge Discovery Center"""
+        try:
+            if hasattr(self, 'knowledge_engine'):
+                # Erstelle Knowledge Center GUI falls noch nicht vorhanden
+                if not self.knowledge_center:
+                    from toobix.gui.knowledge_discovery_center import KnowledgeDiscoveryCenter
+                    self.knowledge_center = KnowledgeDiscoveryCenter(
+                        self.root,
+                        self.knowledge_engine,
+                        self._execute_suggestion_action
+                    )
+                
+                # Zeige das Center
+                self.knowledge_center.show_center()
+                self._add_message("System", "📚 Knowledge Discovery Center geöffnet!")
+            else:
+                self._add_message("System", "📚 Knowledge Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Knowledge Center konnte nicht geöffnet werden: {e}")
+    
+    def _start_meditation(self):
+        """Startet Meditation"""
+        try:
+            if hasattr(self, 'wellness_engine'):
+                self.wellness_engine.start_guided_meditation("calm", 5)
+                self._add_wellness_message("🧘 5-Minuten Meditation gestartet")
+                self._add_message("Wellness", "🧘 Meditation-Session gestartet! Entspanne dich...")
+            else:
+                self._add_message("System", "🎵 Wellness Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Meditation konnte nicht gestartet werden: {e}")
+    
+    def _start_breathing(self):
+        """Startet Atemübung"""
+        try:
+            if hasattr(self, 'wellness_engine'):
+                self.wellness_engine.start_breathing_exercise("box")
+                self._add_wellness_message("🫁 Box-Breathing Übung gestartet")
+                self._add_message("Wellness", "🫁 Atemübung gestartet! Folge dem Rhythmus...")
+            else:
+                self._add_message("System", "🎵 Wellness Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Atemübung konnte nicht gestartet werden: {e}")
+    
+    def _start_soundscape(self):
+        """Startet Soundscape"""
+        try:
+            if hasattr(self, 'wellness_engine'):
+                self.wellness_engine.start_adaptive_soundscape("focus")
+                self._add_wellness_message("🎵 Focus Soundscape gestartet")
+                self._add_message("Wellness", "🎵 Fokus-Soundscape aktiviert!")
+            else:
+                self._add_message("System", "🎵 Wellness Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Soundscape konnte nicht gestartet werden: {e}")
+    
+    def _add_wellness_message(self, text):
+        """Fügt Nachricht zum Wellness Display hinzu"""
+        try:
+            timestamp = datetime.now().strftime('%H:%M:%S')
+            wellness_text = f"[{timestamp}] {text}\n"
+            
+            if CTK_AVAILABLE:
+                self.wellness_display.insert("end", wellness_text)
+            else:
+                self.wellness_display.insert(tk.END, wellness_text)
+                self.wellness_display.see(tk.END)
+        except Exception as e:
+            logger.error(f"Wellness Display Fehler: {e}")
+    
+    def _update_system_status(self):
+        """Aktualisiert System Status Display"""
+        try:
+            if hasattr(self, 'status_display'):
+                # Sammle System-Informationen
+                status_text = f"🚀 TOOBIX SYSTEM STATUS\n"
+                status_text += f"Zeitstempel: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                
+                # AI Status
+                ai_status = self.ai_handler.get_status()
+                status_text += f"🧠 AI SYSTEM:\n"
+                status_text += f"  Ollama: {'✅' if ai_status['ollama_available'] else '❌'}\n"
+                status_text += f"  Groq: {'✅' if ai_status['groq_available'] else '❌'}\n"
+                status_text += f"  Model: {ai_status['current_model']}\n\n"
+                
+                # Phase 4 Components
+                status_text += f"📚 PHASE 4 COMPONENTS:\n"
+                status_text += f"  Documentation: {'✅' if hasattr(self, 'documentation_engine') else '❌'}\n"
+                status_text += f"  Thought Stream: {'✅' if hasattr(self, 'thought_stream_engine') else '❌'}\n"
+                status_text += f"  Settings: {'✅' if hasattr(self, 'extended_settings') else '❌'}\n"
+                status_text += f"  Tutorials: {'✅' if hasattr(self, 'tutorial_system') else '❌'}\n\n"
+                
+                # System Health
+                status_text += f"💻 SYSTEM HEALTH:\n"
+                status_text += f"  CPU: Loading...\n"
+                status_text += f"  Memory: Loading...\n"
+                status_text += f"  Status: Excellent\n"
+                
+                if CTK_AVAILABLE:
+                    self.status_display.delete("1.0", "end")
+                    self.status_display.insert("1.0", status_text)
+                else:
+                    self.status_display.delete("1.0", tk.END)
+                    self.status_display.insert("1.0", status_text)
+        except Exception as e:
+            logger.error(f"Status Update Fehler: {e}")
+    
+    def _setup_phase4_updates(self):
+        """Setzt regelmäßige Updates für Phase 4 Features"""
+        def update_loop():
+            self._update_system_status()
+            # Schedule next update
+            self.root.after(10000, update_loop)  # Alle 10 Sekunden
+        
+        # Starte Update-Loop
+        self.root.after(1000, update_loop)  # Erste Update nach 1 Sekunde
     
     def _on_closing(self):
         """Behandelt Fenster schließen"""

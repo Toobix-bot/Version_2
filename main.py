@@ -29,9 +29,9 @@ class ToobixAssistant:
         self.speech_engine = SpeechEngine(self.settings)
         self.desktop = DesktopIntegration()
         
-        # GUI erstellen - Optimierte Version verwenden
-        from toobix.gui.optimized_gui import OptimizedToobixGUI
-        self.gui = OptimizedToobixGUI(
+        # GUI erstellen - Phase 4 Version verwenden
+        from toobix.gui.main_window import ToobixGUI
+        self.gui = ToobixGUI(
             ai_handler=self.ai_handler,
             speech_engine=self.speech_engine,
             desktop=self.desktop,
