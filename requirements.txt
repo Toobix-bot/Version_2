@@ -1,0 +1,41 @@
+# Toobix AI Assistant Dependencies
+
+# Core AI and Speech
+ollama
+groq
+openai-whisper
+pyttsx3
+SpeechRecognition
+pyaudio
+
+# GUI Framework
+tkinter
+customtkinter
+Pillow
+
+# Desktop Integration
+psutil
+pygetwindow
+pyautogui
+keyboard
+mouse
+
+# Utilities
+python-dotenv
+requests
+aiohttp
+asyncio
+threading
+pathlib
+json
+os
+
+# Optional: Advanced Features
+schedule
+plyer
+win10toast
+
+# Development
+pytest
+black
+flake8
