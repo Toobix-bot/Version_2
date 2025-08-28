@@ -104,6 +104,19 @@ class ToobixGUI:
             self.knowledge_center = None
             print("📚 Knowledge Discovery Center bereit")
             
+            # Story Universe Engine
+            from toobix.core.story_universe_engine import StoryUniverseEngine
+            self.story_engine = StoryUniverseEngine()
+            print("🎮 Story Universe Engine initialisiert")
+            
+            # Story Universe GUI (wird bei Bedarf erstellt)
+            self.story_universe_gui = None
+            print("🎮 Story Universe GUI bereit")
+            
+            # Registriere Story Event Callbacks für reale Aktionen
+            self._register_story_callbacks()
+            print("🎮 Story Universe Callbacks registriert")
+            
             # Self-Modification Engine placeholder
             self.self_modification_active = False
             print("✅ Self-Modification Framework bereit")
@@ -274,6 +287,22 @@ class ToobixGUI:
                 command=self._show_knowledge_center
             )
         self.knowledge_button.pack(side="left", padx=2)
+        
+        # Story Universe Button
+        if CTK_AVAILABLE:
+            self.story_button = ctk.CTkButton(
+                feature_frame, 
+                text="🎮 Story", 
+                command=self._show_story_universe,
+                width=80
+            )
+        else:
+            self.story_button = ttk.Button(
+                feature_frame, 
+                text="🎮 Story", 
+                command=self._show_story_universe
+            )
+        self.story_button.pack(side="left", padx=2)
         
         # Status-Info
         self.listening_status = self._create_label(
@@ -559,6 +588,13 @@ class ToobixGUI:
         
         # Nachricht anzeigen
         self._add_message("Du", message)
+        
+        # Story Universe Event: AI Query
+        if hasattr(self, 'story_engine') and self.story_engine:
+            try:
+                self.story_engine.trigger_event('ai_query')
+            except:
+                pass
         
         # AI-Antwort in separatem Thread
         threading.Thread(
@@ -1879,6 +1915,78 @@ Fehler hintereinander: {status['consecutive_failures']}
         except Exception as e:
             self._add_message("Fehler", f"Knowledge Center konnte nicht geöffnet werden: {e}")
     
+    def _show_story_universe(self):
+        """Zeigt das Story Universe"""
+        try:
+            if hasattr(self, 'story_engine'):
+                # Erstelle Story Universe GUI falls noch nicht vorhanden
+                if not self.story_universe_gui:
+                    from toobix.gui.story_universe_gui import StoryUniverseGUI
+                    self.story_universe_gui = StoryUniverseGUI(
+                        self.root,
+                        self.story_engine,
+                        self._execute_story_action
+                    )
+                
+                # Zeige das Universe
+                self.story_universe_gui.show()
+                self._add_message("System", "🎮 Story Universe geöffnet! Dein Abenteuer wartet...")
+            else:
+                self._add_message("System", "🎮 Story Engine nicht verfügbar")
+        except Exception as e:
+            self._add_message("Fehler", f"Story Universe konnte nicht geöffnet werden: {e}")
+    
+    def _execute_story_action(self, action: str):
+        """Führt Story-Aktionen aus"""
+        try:
+            if action == "complete_quest":
+                self._add_message("Story", "🎯 Quest completed! XP earned!")
+            elif action == "use_item":
+                self._add_message("Story", "🎒 Item used! Effect applied!")
+            elif action == "start_chapter":
+                self._add_message("Story", "📖 New chapter started!")
+            elif action.startswith("trigger_"):
+                event_type = action.replace("trigger_", "")
+                if hasattr(self, 'story_engine'):
+                    self.story_engine.trigger_event(event_type)
+                    self._add_message("Story", f"🎮 Event triggered: {event_type}")
+            else:
+                self._add_message("Story", f"🎮 Story action: {action}")
+        except Exception as e:
+            self._add_message("Fehler", f"Story action failed: {e}")
+    
+    def _register_story_callbacks(self):
+        """Registriert Story Events für reale Toobix-Aktionen"""
+        if hasattr(self, 'story_engine'):
+            # Produktivitäts-Events
+            def on_task_completed():
+                self.story_engine.trigger_event('task_completed')
+                
+            def on_code_written():
+                self.story_engine.trigger_event('code_written')
+                
+            def on_ai_query():
+                self.story_engine.trigger_event('ai_query')
+                
+            def on_system_monitored():
+                self.story_engine.trigger_event('system_monitored')
+                
+            def on_git_action():
+                self.story_engine.trigger_event('git_action')
+                
+            def on_wellness_activity():
+                self.story_engine.trigger_event('wellness_activity')
+            
+            # Speichere callbacks für später
+            self.story_callbacks = {
+                'task_completed': on_task_completed,
+                'code_written': on_code_written,
+                'ai_query': on_ai_query,
+                'system_monitored': on_system_monitored,
+                'git_action': on_git_action,
+                'wellness_activity': on_wellness_activity
+            }
+    
     def _start_meditation(self):
         """Startet Meditation"""
         try:
@@ -1886,6 +1994,13 @@ Fehler hintereinander: {status['consecutive_failures']}
                 self.wellness_engine.start_guided_meditation("calm", 5)
                 self._add_wellness_message("🧘 5-Minuten Meditation gestartet")
                 self._add_message("Wellness", "🧘 Meditation-Session gestartet! Entspanne dich...")
+                
+                # Story Universe Event: Meditation
+                if hasattr(self, 'story_engine') and self.story_engine:
+                    try:
+                        self.story_engine.trigger_event('meditation_completed')
+                    except:
+                        pass
             else:
                 self._add_message("System", "🎵 Wellness Engine nicht verfügbar")
         except Exception as e:
@@ -1898,6 +2013,13 @@ Fehler hintereinander: {status['consecutive_failures']}
                 self.wellness_engine.start_breathing_exercise("box")
                 self._add_wellness_message("🫁 Box-Breathing Übung gestartet")
                 self._add_message("Wellness", "🫁 Atemübung gestartet! Folge dem Rhythmus...")
+                
+                # Story Universe Event: Breathing
+                if hasattr(self, 'story_engine') and self.story_engine:
+                    try:
+                        self.story_engine.trigger_event('breathing_exercise')
+                    except:
+                        pass
             else:
                 self._add_message("System", "🎵 Wellness Engine nicht verfügbar")
         except Exception as e:
