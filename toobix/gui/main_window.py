@@ -11,7 +11,12 @@ import os
 from pathlib import Path
 from datetime import datetime
 import psutil
+import logging
 from typing import Optional
+
+# Konfiguriere Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 try:
     import customtkinter as ctk
@@ -36,6 +41,9 @@ class ToobixGUI:
         
         # Chat-Historie
         self.chat_history = []
+        
+        # === PHASE 4 COMPONENTS ===
+        self._initialize_phase4_components()
         
         print("🎨 GUI wird initialisiert...")
         self._setup_gui()
@@ -1388,8 +1396,49 @@ Fehler hintereinander: {status['consecutive_failures']}
         
         messagebox.showinfo("Toobix AI Status", status_text)
     
+    def _initialize_phase4_components(self):
+        """Initialisiert Phase 4 Components für System-Transparenz"""
+        try:
+            from toobix.core.system_documentation_engine import SystemDocumentationEngine
+            from toobix.core.ki_thought_stream_engine import KIThoughtStreamEngine
+            from toobix.core.extended_settings_engine import ExtendedSettingsEngine
+            from toobix.core.interactive_tutorial_system import InteractiveTutorialSystem
+            
+            self.documentation_engine = SystemDocumentationEngine()
+            self.thought_stream_engine = KIThoughtStreamEngine()
+            self.extended_settings = ExtendedSettingsEngine()
+            self.tutorial_system = InteractiveTutorialSystem()
+            
+            # Starte KI Thought Stream
+            self.thought_stream_engine.start_thought_stream()
+            
+            # Registriere GUI Callbacks für Thought Stream
+            self.thought_stream_engine.register_thought_callback(self._on_new_thought)
+            
+            logger.info("📚 Phase 4 Components initialisiert - System Transparenz aktiv")
+        except Exception as e:
+            logger.error(f"Phase 4 Component Fehler: {e}")
+            self.documentation_engine = None
+            self.thought_stream_engine = None
+            self.extended_settings = None
+            self.tutorial_system = None
+    
+    def _on_new_thought(self, thought):
+        """Callback für neue KI-Gedanken"""
+        try:
+            # Zeige Gedanken im Chat (optional, könnte auch separates Panel sein)
+            if thought.thought_type in ['insight', 'suggestion'] and thought.priority in ['medium', 'high']:
+                thought_text = f"💭 KI-Gedanke: {thought.content}"
+                self.root.after(0, lambda: self._add_message("Toobix Brain", thought_text))
+        except Exception as e:
+            logger.error(f"Thought Callback Fehler: {e}")
+    
     def _on_closing(self):
         """Behandelt Fenster schließen"""
+        # Stoppe Phase 4 Components
+        if hasattr(self, 'thought_stream_engine') and self.thought_stream_engine:
+            self.thought_stream_engine.stop_thought_stream()
+            
         self.speech_engine.stop()
         self.root.destroy()
     

@@ -1,0 +1,19 @@
+{
+  "default": {
+    "basics": {
+      "tutorial_id": "basics",
+      "user_id": "default",
+      "started_at": "2025-08-28T09:15:56.780415",
+      "current_step": 0,
+      "completed_steps": [
+        "welcome"
+      ],
+      "skipped_steps": [],
+      "completion_status": "in_progress",
+      "completion_percentage": 16.666666666666664,
+      "time_spent": 0.0,
+      "last_activity": "2025-08-28T09:15:56.781790",
+      "quiz_scores": {}
+    }
+  }
+}
