@@ -19,12 +19,12 @@ class Settings:
         self.OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'gemma2:2b')
         self.OLLAMA_URL = os.getenv('OLLAMA_URL', 'http://localhost:11434')
         
-        # Groq Cloud-Backup
+        # Groq Cloud-Backup - UPGRADED zu bestem verfügbaren Model
         self.GROQ_API_KEY = os.getenv('GROQ_API_KEY', '')
-        self.GROQ_MODEL = os.getenv('GROQ_MODEL', 'mixtral-8x7b-32768')
+        self.GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.1-70b-versatile')  # Upgraded!
         
-        # Wann Cloud-KI verwenden (Zeichenanzahl)
-        self.CLOUD_THRESHOLD = int(os.getenv('CLOUD_THRESHOLD', '1000'))
+        # Wann Cloud-KI verwenden (reduziert für bessere Performance)
+        self.CLOUD_THRESHOLD = int(os.getenv('CLOUD_THRESHOLD', '500'))
         
         # === Sprach-Konfiguration ===
         self.WAKE_WORD = os.getenv('WAKE_WORD', 'hey toobix')

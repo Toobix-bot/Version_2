@@ -1,0 +1,14 @@
+{
+  "memories": [
+    {
+      "timestamp": "2025-08-28T13:36:21.495464",
+      "content": "Das ist eine tolle Funktion, danke!",
+      "emotional_significance": 0.6,
+      "user_mood_detected": "happy",
+      "ai_growth_moment": false,
+      "tags": []
+    }
+  ],
+  "user_preferences": {},
+  "emotional_connections": {}
+}

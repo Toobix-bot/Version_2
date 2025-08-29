@@ -68,6 +68,15 @@ class CreativeWellnessEngine:
         self.wellness_preferences = {}
         self.wellness_streaks = defaultdict(int)
         
+        # Performance-Optimierung: Tracking für reduzierte Frequenz
+        self.last_biofeedback_check = datetime.now() - timedelta(minutes=10)
+        self.last_wellness_check = datetime.now() - timedelta(minutes=15)
+        self.last_soundscape_adapt = datetime.now() - timedelta(minutes=5)
+        
+        # Monitoring-Status
+        self.monitoring_active = False
+        self.monitoring_thread = None
+        
         # Wellness-Konfiguration
         self.wellness_config = {
             'enable_binaural_beats': True,
@@ -171,25 +180,45 @@ class CreativeWellnessEngine:
         self.monitoring_active = False
     
     def _wellness_monitoring_loop(self) -> None:
-        """Haupt-Wellness-Monitoring Loop"""
+        """Haupt-Wellness-Monitoring Loop - Optimiert für Performance"""
         while self.monitoring_active:
             try:
-                # Biofeedback-Simulation (in echter Implementierung: Hardware-Integration)
-                self._simulate_biofeedback()
+                # Reduzierte Frequenz für bessere Performance
                 
-                # Wellness-Checks
-                self._check_stress_levels()
-                self._check_break_needs()
-                self._check_posture_reminders()
+                # Biofeedback nur alle 5 Minuten
+                if self._should_run_biofeedback():
+                    self._simulate_biofeedback()
                 
-                # Adaptive Soundscape-Anpassung
-                self._adapt_current_soundscape()
+                # Wellness-Checks nur alle 10 Minuten
+                if self._should_run_wellness_checks():
+                    self._check_stress_levels()
+                    self._check_break_needs()
+                    self._check_posture_reminders()
                 
-                time.sleep(60)  # Alle 60 Sekunden
+                # Soundscape-Anpassung nur alle 3 Minuten
+                if self._should_adapt_soundscape():
+                    self._adapt_current_soundscape()
+                
+                time.sleep(300)  # Alle 5 Minuten statt 1 Minute
                 
             except Exception as e:
                 logger.error(f"Wellness-Monitoring Fehler: {e}")
-                time.sleep(120)
+                time.sleep(600)  # 10 Minuten wait bei Fehler
+    
+    def _should_run_biofeedback(self) -> bool:
+        """Prüft ob Biofeedback-Check durchgeführt werden soll (alle 5 Min)"""
+        now = datetime.now()
+        return (now - self.last_biofeedback_check).total_seconds() >= 300
+    
+    def _should_run_wellness_checks(self) -> bool:
+        """Prüft ob Wellness-Checks durchgeführt werden sollen (alle 10 Min)"""
+        now = datetime.now()
+        return (now - self.last_wellness_check).total_seconds() >= 600
+    
+    def _should_adapt_soundscape(self) -> bool:
+        """Prüft ob Soundscape-Anpassung durchgeführt werden soll (alle 3 Min)"""
+        now = datetime.now()
+        return (now - self.last_soundscape_adapt).total_seconds() >= 180
     
     def _simulate_biofeedback(self) -> None:
         """Simuliert Biofeedback-Daten (für Demo)"""
@@ -238,6 +267,7 @@ class CreativeWellnessEngine:
         )
         
         self.biofeedback_history.append(biofeedback)
+        self.last_biofeedback_check = now  # Zeitstempel aktualisieren
     
     def _check_stress_levels(self) -> None:
         """Überprüft Stress-Level und empfiehlt Interventionen"""
@@ -249,6 +279,8 @@ class CreativeWellnessEngine:
         
         if avg_stress > self.wellness_config['stress_threshold']:
             self._recommend_stress_relief()
+        
+        self.last_wellness_check = datetime.now()  # Zeitstempel aktualisieren
     
     def _check_break_needs(self) -> None:
         """Überprüft ob eine Pause benötigt wird"""
@@ -290,6 +322,8 @@ class CreativeWellnessEngine:
         elif latest_data.focus_level > 85 and latest_data.stress_level < 40:
             # Optimaler Zustand - beibehalten
             pass
+        
+        self.last_soundscape_adapt = datetime.now()  # Zeitstempel aktualisieren
     
     def start_soundscape(self, profile_name: str) -> Dict[str, Any]:
         """Startet eine Soundscape"""

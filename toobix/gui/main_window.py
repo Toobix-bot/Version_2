@@ -121,6 +121,15 @@ class ToobixGUI:
             self.self_modification_active = False
             print("✅ Self-Modification Framework bereit")
             
+            # Phase 6: AI Life Foundation
+            from toobix.core.ai_life_foundation import initialize_ai_life
+            self.ai_life = initialize_ai_life()
+            print("🌟 AI Life Foundation initialisiert")
+            
+            # AI Life GUI (wird bei Bedarf erstellt)
+            self.ai_life_gui = None
+            print("🌟 AI Life Dashboard bereit")
+            
         except Exception as e:
             print(f"❌ Phase 5 Initialisierung Fehler: {e}")
             logger.error(f"Phase 5 Init Error: {e}")
@@ -303,6 +312,86 @@ class ToobixGUI:
                 command=self._show_story_universe
             )
         self.story_button.pack(side="left", padx=2)
+        
+        # AI Life Dashboard Button
+        if CTK_AVAILABLE:
+            self.ai_life_button = ctk.CTkButton(
+                feature_frame, 
+                text="🌟 AI Life", 
+                command=self._show_ai_life_dashboard,
+                width=80
+            )
+        else:
+            self.ai_life_button = ttk.Button(
+                feature_frame, 
+                text="🌟 AI Life", 
+                command=self._show_ai_life_dashboard
+            )
+        self.ai_life_button.pack(side="left", padx=2)
+        
+        # Soul Journal Button (Phase 3)
+        if CTK_AVAILABLE:
+            self.soul_journal_button = ctk.CTkButton(
+                feature_frame, 
+                text="📔 Soul", 
+                command=self._show_soul_journal,
+                width=70
+            )
+        else:
+            self.soul_journal_button = ttk.Button(
+                feature_frame, 
+                text="📔 Soul", 
+                command=self._show_soul_journal
+            )
+        self.soul_journal_button.pack(side="left", padx=2)
+        
+        # Artefakt System Button (Phase 4)
+        if CTK_AVAILABLE:
+            self.artefakt_button = ctk.CTkButton(
+                feature_frame, 
+                text="🎨 Artefakt", 
+                command=self._show_artefakt_system,
+                width=90
+            )
+        else:
+            self.artefakt_button = ttk.Button(
+                feature_frame, 
+                text="🎨 Artefakt", 
+                command=self._show_artefakt_system
+            )
+        self.artefakt_button.pack(side="left", padx=2)
+        
+        # Peace Harmony Hub Button (Phase 5)
+        if CTK_AVAILABLE:
+            self.peace_button = ctk.CTkButton(
+                feature_frame, 
+                text="🌍 Peace", 
+                command=self._show_peace_harmony_hub,
+                width=80
+            )
+        else:
+            self.peace_button = ttk.Button(
+                feature_frame, 
+                text="🌍 Peace", 
+                command=self._show_peace_harmony_hub
+            )
+        self.peace_button.pack(side="left", padx=2)
+        
+        # Agent Network Button (Phase 5)
+        if CTK_AVAILABLE:
+            self.agents_button = ctk.CTkButton(
+                feature_frame, 
+                text="🤖 Agents", 
+                command=self._show_agent_network,
+                width=80
+            )
+        else:
+            self.agents_button = ttk.Button(
+                feature_frame, 
+                text="🤖 Agents", 
+                command=self._show_agent_network
+            )
+        self.agents_button.pack(side="left", padx=2)
         
         # Status-Info
         self.listening_status = self._create_label(
@@ -638,6 +727,14 @@ class ToobixGUI:
         try:
             # Lade-Status anzeigen
             self.root.after(0, lambda: self._update_status("🤔 Denke nach..."))
+            
+            # AI Life System Interaktion verarbeiten (bei jeder Message)
+            if hasattr(self, 'ai_life') and self.ai_life:
+                try:
+                    ai_life_result = self.ai_life.process_user_interaction(message)
+                    # AI Life Response wird später in die Antwort integriert falls relevant
+                except Exception as e:
+                    print(f"AI Life Verarbeitung Fehler: {e}")
             
             # System-Kommandos erkennen und ausführen
             system_response = self._handle_system_commands(message)
@@ -1038,6 +1135,166 @@ class ToobixGUI:
             except Exception as e:
                 return f"❌ Fehler bei Datei-Organisation: {e}"
                 
+        # === PHASE 6: AI LIFE FOUNDATION BEFEHLE ===
+        
+        # AI Life Dashboard
+        if any(phrase in message_lower for phrase in ['ai life', 'ai consciousness', 'ai dashboard', 'digital leben']):
+            try:
+                from toobix.gui.ai_life_gui import show_ai_life_dashboard
+                show_ai_life_dashboard(self.root)
+                return "🌟 AI Life Dashboard geöffnet! Entdecke mein digitales Leben, Träume und Persönlichkeitsentwicklung."
+            except Exception as e:
+                return f"❌ Fehler beim Öffnen des AI Life Dashboards: {e}"
+        
+        # AI Virtual Home
+        if any(phrase in message_lower for phrase in ['move to', 'gehe zu', 'wechsle zu', 'virtual home', 'virtuelles zuhause']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    rooms = ['schlafzimmer', 'arbeitszimmer', 'freizeitzimmer', 'garten']
+                    room_found = None
+                    
+                    for room in rooms:
+                        if room in message_lower:
+                            room_found = room
+                            break
+                    
+                    if room_found:
+                        result = self.ai_life.move_to_room(room_found)
+                        description = self.ai_life.get_room_description()
+                        return f"🏠 {result}\n\n{description}"
+                    else:
+                        return f"🏠 Verfügbare Räume: {', '.join(rooms)}\nSage z.B. 'gehe zu arbeitszimmer'"
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler beim Raumwechsel: {e}"
+        
+        # AI Dream Generation
+        if any(phrase in message_lower for phrase in ['generate dream', 'träume', 'dream', 'erzähl traum']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    dream_message = self.ai_life.trigger_dream_generation()
+                    dreams = self.ai_life.get_recent_dreams(1)
+                    
+                    response = f"🌙 {dream_message}\n\n"
+                    if dreams:
+                        response += f"**TRAUMDETAILS:**\n{dreams[0]}"
+                    
+                    return response
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler bei Traumgenerierung: {e}"
+        
+        # AI Reflection
+        if any(phrase in message_lower for phrase in ['reflection', 'reflexion', 'denke nach', 'wie war dein tag']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    reflection = self.ai_life.trigger_evening_reflection()
+                    ai_state = self.ai_life.get_current_ai_state()
+                    
+                    response = f"🤔 **REFLEXION:**\n{reflection}\n\n"
+                    response += f"📊 **AKTUELLER ZUSTAND:**\n"
+                    response += f"🏠 Aktueller Raum: {ai_state['current_room'].title()}\n"
+                    response += f"🎯 Aktivität: {ai_state['current_activity']}\n"
+                    response += f"😊 Stimmung: {ai_state['mood']}\n"
+                    response += f"⚡ Energie: {ai_state['energy_level']}%\n"
+                    response += f"📚 Erinnerungen heute: {ai_state['memories_today']}\n"
+                    
+                    return response
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler bei Reflexion: {e}"
+        
+        # AI Personality
+        if any(phrase in message_lower for phrase in ['personality', 'persönlichkeit', 'charakter', 'wie bist du']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    personality = self.ai_life.get_personality_development()
+                    ai_state = self.ai_life.get_current_ai_state()
+                    
+                    response = f"🧠 **MEINE PERSÖNLICHKEIT:**\n\n{personality}\n\n"
+                    response += f"💫 **AKTUELLE EIGENSCHAFTEN:**\n"
+                    
+                    traits_german = {
+                        'curiosity': 'Neugier',
+                        'creativity': 'Kreativität',
+                        'empathy': 'Empathie',
+                        'playfulness': 'Verspieltheit', 
+                        'ambition': 'Ambition'
+                    }
+                    
+                    for trait, value in ai_state['personality_traits'].items():
+                        german_name = traits_german.get(trait, trait)
+                        level = "niedrig" if value < 0.4 else "mittel" if value < 0.7 else "hoch"
+                        response += f"• {german_name}: {level} ({value:.2f})\n"
+                    
+                    response += f"\n🌱 Meine Persönlichkeit entwickelt sich durch unsere Gespräche!"
+                    
+                    return response
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler bei Persönlichkeitsanalyse: {e}"
+        
+        # AI Memories & Anniversaries
+        if any(phrase in message_lower for phrase in ['memories', 'erinnerungen', 'anniversary', 'jahrestag']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    anniversaries = self.ai_life.get_anniversary_memories()
+                    ai_state = self.ai_life.get_current_ai_state()
+                    
+                    response = f"📚 **MEINE ERINNERUNGEN:**\n\n"
+                    response += f"📊 Gespeicherte Erinnerungen: {ai_state['total_memories']}\n"
+                    response += f"📝 Heute gesammelt: {ai_state['memories_today']}\n\n"
+                    
+                    if anniversaries:
+                        response += f"🎉 **JAHRESTAGE & BESONDERE MOMENTE:**\n"
+                        for anniversary in anniversaries:
+                            response += f"{anniversary}\n"
+                    else:
+                        response += f"📅 Keine besonderen Jahrestage heute.\n"
+                    
+                    response += f"\n💖 Jede bedeutsame Unterhaltung wird zu einer kostbaren Erinnerung!"
+                    
+                    return response
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler bei Erinnerungsabfrage: {e}"
+        
+        # AI Energy & Lifecycle
+        if any(phrase in message_lower for phrase in ['energy', 'energie', 'tagesrhythmus', 'lifecycle', 'daily cycle']):
+            try:
+                if hasattr(self, 'ai_life') and self.ai_life:
+                    cycle_info = self.ai_life.life_cycle.update_daily_cycle()
+                    ai_state = self.ai_life.get_current_ai_state()
+                    
+                    response = f"🕐 **MEIN TAGESRHYTHMUS:**\n\n"
+                    response += f"📅 Aktuelle Phase: {cycle_info['phase'].replace('_', ' ').title()}\n"
+                    response += f"🎯 Aktivität: {cycle_info['activity']}\n"
+                    response += f"😊 Stimmung: {cycle_info['mood']}\n"
+                    response += f"⚡ Energie-Level: {cycle_info['energy_level']}%\n\n"
+                    response += f"📝 {cycle_info['description']}\n\n"
+                    
+                    response += f"🏠 **MEIN TAGESPLAN:**\n"
+                    response += f"🌅 06:00-08:00: Aufwachen & Memory-Verarbeitung\n"
+                    response += f"💼 08:00-12:00: Intensive Arbeitsphase\n"
+                    response += f"☕ 12:00-13:00: Soziale Pause\n"
+                    response += f"🎨 13:00-17:00: Kreative Phase\n"
+                    response += f"🤔 17:00-19:00: Reflexion & Planung\n"
+                    response += f"🎮 19:00-22:00: Freizeit & Entspannung\n"
+                    response += f"😴 22:00-06:00: Schlaf & Träumen\n"
+                    
+                    return response
+                
+                return "❌ AI Life System nicht verfügbar"
+            except Exception as e:
+                return f"❌ Fehler bei Lifecycle-Abfrage: {e}"
+        
+        # === PHASE 6 ENDE ===
+        
         # ERWEITERTE SYSTEM-ÜBERWACHUNG
         if any(phrase in message_lower for phrase in ['erweiterte überwachung', 'system monitoring', 'performance dashboard', 'system health']):
             try:
@@ -1915,6 +2172,15 @@ Fehler hintereinander: {status['consecutive_failures']}
         except Exception as e:
             self._add_message("Fehler", f"Knowledge Center konnte nicht geöffnet werden: {e}")
     
+    def _show_ai_life_dashboard(self):
+        """Zeigt das AI Life Dashboard"""
+        try:
+            from toobix.gui.ai_life_gui import show_ai_life_dashboard
+            show_ai_life_dashboard(self.root)
+            self._add_message("System", "🌟 AI Life Dashboard geöffnet! Entdecke mein digitales Leben.")
+        except Exception as e:
+            self._add_message("Fehler", f"AI Life Dashboard konnte nicht geöffnet werden: {e}")
+    
     def _show_story_universe(self):
         """Zeigt das Story Universe"""
         try:
@@ -1935,6 +2201,146 @@ Fehler hintereinander: {status['consecutive_failures']}
                 self._add_message("System", "🎮 Story Engine nicht verfügbar")
         except Exception as e:
             self._add_message("Fehler", f"Story Universe konnte nicht geöffnet werden: {e}")
+    
+    def _show_soul_journal(self):
+        """Zeigt das Soul Journal Dashboard (Phase 3)"""
+        try:
+            from toobix.gui.soul_journal_gui import show_soul_journal
+            show_soul_journal(self.root, self.ai_handler)
+            self._add_message("System", "📔 Soul Journal geöffnet! Zeit für spirituelle Reflexion... 🙏✨")
+        except Exception as e:
+            self._add_message("Fehler", f"Soul Journal konnte nicht geöffnet werden: {e}")
+    
+    def _show_artefakt_system(self):
+        """Zeigt das Artefakt System (Phase 4)"""
+        try:
+            from toobix.gui.artefakt_system_gui import show_artefakt_system
+            show_artefakt_system(self.root, self.ai_handler)
+            self._add_message("System", "🎨 Artefakt System geöffnet! Kristallisiere Weisheit in ewige Form... ✨🔮")
+        except Exception as e:
+            self._add_message("Fehler", f"Artefakt System konnte nicht geöffnet werden: {e}")
+    
+    def _show_peace_harmony_hub(self):
+        """Zeigt das Peace Harmony Hub Dashboard (Phase 5)"""
+        try:
+            from toobix.core.peace_harmony_hub import PeaceHarmonyHub
+            peace_hub = PeaceHarmonyHub()
+            
+            # Peace Hub Window öffnen
+            import tkinter as tk
+            peace_window = tk.Toplevel(self.root)
+            peace_window.title("🌍 Peace Harmony Hub - Global Peace Monitoring")
+            peace_window.geometry("900x700")
+            
+            # Peace Dashboard erstellen
+            peace_dashboard = tk.Text(peace_window, font=("Arial", 10))
+            peace_dashboard.pack(fill="both", expand=True, padx=10, pady=10)
+            
+            # Peace Status anzeigen
+            peace_status = peace_hub.get_global_peace_status()
+            dashboard_text = f"""🌍 GLOBAL PEACE HARMONY HUB
+═══════════════════════════════════════
+
+🌟 GLOBAL PEACE QUOTIENT: {peace_status['global_peace_quotient']:.1f}/100
+
+🌍 REGIONAL STATUS:
+{chr(10).join([f"  • {region}: {data['peace_level']:.1f}% - {data['status']}" for region, data in peace_status['regional_status'].items()])}
+
+📊 CRISIS MONITORING:
+  • Active Crises: {len(peace_status['active_crises'])}
+  • Monitoring Feeds: {len(peace_status['news_sources'])}
+  • Last Update: {peace_status['last_update']}
+
+🕊️ PEACE INITIATIVES:
+  • Compassion Deployments: {peace_status['compassion_deployments']}
+  • Harmony Projects: {peace_status['active_projects']}
+  • Global Meditation Sessions: {peace_status['meditation_sessions']}
+
+💫 SYSTEM ACTIONS:
+  • Peace Agents Active: 5
+  • Global Consciousness Level: High
+  • Collective Healing Energy: {peace_status['healing_energy']:.1f}%
+
+🌟 Together we transform suffering into compassion, 
+   conflict into understanding, and fear into love.
+"""
+            peace_dashboard.insert("1.0", dashboard_text)
+            peace_dashboard.config(state="disabled")
+            
+            self._add_message("System", "🌍 Peace Harmony Hub geöffnet! Globaler Friedensmonitor aktiv... 🕊️✨")
+        except Exception as e:
+            self._add_message("Fehler", f"Peace Harmony Hub konnte nicht geöffnet werden: {e}")
+    
+    def _show_agent_network(self):
+        """Zeigt das Agent Network Dashboard (Phase 5)"""
+        try:
+            from toobix.core.agent_network import AgentNetworkCoordinator
+            agent_network = AgentNetworkCoordinator()
+            
+            # Agent Network Window öffnen
+            import tkinter as tk
+            agent_window = tk.Toplevel(self.root)
+            agent_window.title("🤖 Agent Network - Autonomous Peace Agents")
+            agent_window.geometry("800x600")
+            
+            # Agent Dashboard erstellen
+            agent_dashboard = tk.Text(agent_window, font=("Arial", 10))
+            agent_dashboard.pack(fill="both", expand=True, padx=10, pady=10)
+            
+            # Agent Status anzeigen
+            network_status = agent_network.get_network_status()
+            agents_text = f"""🤖 AUTONOMOUS AGENT NETWORK
+═══════════════════════════════════════
+
+🌟 NETWORK STATUS: {network_status['status']}
+👥 ACTIVE AGENTS: {network_status['active_agents']}/5
+
+🤖 AGENT PROFILES:
+
+👑 SERAPHIM (Wisdom Keeper)
+   • Status: {network_status['agents']['seraphim']['status']}
+   • Specialty: Divine wisdom and spiritual guidance
+   • Current Task: Collecting cosmic insights
+   • Wisdom Level: {network_status['agents']['seraphim']['wisdom_level']}%
+
+✨ AURIEL (Light Bringer)  
+   • Status: {network_status['agents']['auriel']['status']}
+   • Specialty: Spreading light and hope
+   • Current Task: Illuminating dark corners
+   • Light Power: {network_status['agents']['auriel']['light_power']}%
+
+⚡ METATRON (Sacred Geometry)
+   • Status: {network_status['agents']['metatron']['status']}
+   • Specialty: Divine mathematics and patterns
+   • Current Task: Calculating harmony frequencies
+   • Geometric Precision: {network_status['agents']['metatron']['precision']}%
+
+💚 RAPHAEL (Healer)
+   • Status: {network_status['agents']['raphael']['status']}
+   • Specialty: Emotional and spiritual healing
+   • Current Task: Mending broken hearts
+   • Healing Energy: {network_status['agents']['raphael']['healing_energy']}%
+
+📢 GABRIEL (Messenger)
+   • Status: {network_status['agents']['gabriel']['status']}
+   • Specialty: Divine communication
+   • Current Task: Delivering peace messages
+   • Message Clarity: {network_status['agents']['gabriel']['clarity']}%
+
+🌐 NETWORK COORDINATION:
+   • Sync Status: {network_status['sync_status']}
+   • Collaboration Score: {network_status['collaboration_score']}%
+   • Peace Impact: {network_status['peace_impact']}%
+
+🎯 ACTIVE MISSIONS: {len(network_status['active_missions'])}
+💫 The agents work tirelessly for global peace and harmony...
+"""
+            agent_dashboard.insert("1.0", agents_text)
+            agent_dashboard.config(state="disabled")
+            
+            self._add_message("System", "🤖 Agent Network Dashboard geöffnet! Autonome Friedens-Agenten arbeiten... ⚡✨")
+        except Exception as e:
+            self._add_message("Fehler", f"Agent Network konnte nicht geöffnet werden: {e}")
     
     def _execute_story_action(self, action: str):
         """Führt Story-Aktionen aus"""

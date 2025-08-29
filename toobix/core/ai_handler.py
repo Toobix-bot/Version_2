@@ -171,44 +171,81 @@ VERFÜGBARE FUNKTIONEN:
         return context
     
     def _should_use_cloud(self, prompt: str) -> bool:
-        """Entscheidet ob Cloud-KI verwendet werden soll"""
-        # Wenn Groq verfügbar ist, bevorzuge es für bessere Antworten
-        if self.groq_available:
-            return True
+        """Intelligente Entscheidung: Lokal vs Cloud KI"""
         
-        # Längere Texte → Cloud
-        if len(prompt) > self.ai_config['cloud_threshold']:
-            return True
+        # REGEL 1: Wenn Ollama nicht verfügbar ist → Cloud
+        if not self.ollama_available:
+            return self.groq_available
         
-        # Bei häufigen lokalen Fehlern → Cloud
+        # REGEL 2: Bei zu vielen lokalen Fehlern → Cloud  
         if self.consecutive_failures > 2:
-            return True
+            return self.groq_available
         
-        # Komplexe Anfragen erkennen
-        complex_keywords = [
-            'analysiere', 'erstelle', 'programmiere', 'schreibe',
-            'recherche', 'vergleiche', 'berechne', 'übersetze'
+        # REGEL 3: Einfache Fragen → Lokal (weniger Halluzination)
+        simple_indicators = [
+            'hallo', 'hi', 'was ist', 'wie spät', 'welches datum',
+            'danke', 'ok', 'ja', 'nein', 'hilfe', 'was kannst du'
         ]
         
-        if any(keyword in prompt.lower() for keyword in complex_keywords):
-            return True
+        if any(indicator in prompt.lower() for indicator in simple_indicators):
+            return False  # Lokale KI für einfache Fragen
         
+        # REGEL 4: Komplexe Analyse → Cloud (bessere Qualität)
+        complex_indicators = [
+            'analysiere', 'erstelle', 'programmiere', 'schreibe code', 'entwickle',
+            'recherche', 'vergleiche', 'berechne', 'übersetze', 'erkläre detailliert',
+            'wie funktioniert', 'implementiere', 'optimiere', 'debugging',
+            'algorithm', 'problem solving', 'complex', 'schwierig', 'strategie'
+        ]
+        
+        if any(indicator in prompt.lower() for indicator in complex_indicators):
+            return self.groq_available
+        
+        # REGEL 5: Längere Texte → Cloud
+        if len(prompt) > self.ai_config['cloud_threshold']:
+            return self.groq_available
+        
+        # REGEL 6: Peace Catalyst Features → Cloud (bessere spirituelle Qualität)
+        peace_keywords = [
+            'soul journal', 'artefakt', 'peace', 'meditation', 'wisdom',
+            'spiritual', 'wellness', 'harmony', 'compassion', 'seele'
+        ]
+        
+        if any(keyword in prompt.lower() for keyword in peace_keywords):
+            return self.groq_available
+        
+        # Standard: Lokale KI bevorzugen (weniger Halluzination)
         return False
     
     async def _query_ollama(self, prompt: str, simple: bool = False) -> Optional[str]:
-        """Fragt lokale Ollama-KI ab"""
+        """Fragt lokale Ollama-KI ab mit Anti-Halluzination Optimierungen"""
         try:
             start_time = time.time()
             
+            # Anti-Halluzination System Context
+            anti_hallucination_prompt = f"""Du bist Toobix, ein zuverlässiger deutscher Desktop-Assistent. 
+WICHTIG: Antworte NUR auf Basis deines verfügbaren Wissens. Erfinde KEINE Details. 
+Wenn du etwas nicht weißt, sage ehrlich "Das weiß ich nicht" oder "Das kann ich nicht prüfen".
+
+Benutzer-Anfrage: {prompt}"""
+            
             payload = {
                 "model": self.ai_config['ollama_model'],
-                "prompt": prompt,
-                "stream": False
+                "prompt": anti_hallucination_prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.2 if not simple else 0.1,  # Reduziert für Konsistenz
+                    "top_p": 0.8,                                # Fokussiertere Antworten
+                    "top_k": 40,                                 # Begrenzt Wortauswahl
+                    "repeat_penalty": 1.2,                      # Reduziert Wiederholungen
+                    "num_predict": 600 if not simple else 100   # Angemessene Länge
+                }
             }
             
             # Einfache Anfrage für Fallback
             if simple:
-                payload["options"] = {"num_predict": 100, "temperature": 0.3}
+                payload["options"]["num_predict"] = 50
+                payload["options"]["temperature"] = 0.1
             
             async with aiohttp.ClientSession() as session:
                 async with session.post(
@@ -242,7 +279,7 @@ VERFÜGBARE FUNKTIONEN:
                 "messages": [
                     {
                         "role": "system",
-                        "content": "Du bist Toobix, ein hilfreicher deutscher AI-Desktop-Assistent. Du hilfst bei Computerproblemen, beantwortest Fragen und steuerst Windows-Programme. Antworte freundlich, kurz und präzise auf Deutsch. Wenn du Befehle ausführen sollst, erkläre was du tust."
+                        "content": "Du bist Toobix, ein zuverlässiger deutscher AI-Desktop-Assistent. ANTI-HALLUZINATION REGELN: 1) Antworte NUR basierend auf verfügbaren Informationen 2) Erfinde KEINE Details, Programme oder Features 3) Wenn unsicher, sage 'Das weiß ich nicht sicher' 4) Bleibe bei deinem Wissensstand 5) Keine spekulativen Antworten. Du hilfst bei Computerproblemen, beantwortest Fragen und steuerst Windows-Programme. Antworte freundlich, kurz und präzise auf Deutsch."
                     },
                     {
                         "role": "user", 
@@ -250,8 +287,11 @@ VERFÜGBARE FUNKTIONEN:
                     }
                 ],
                 "model": self.ai_config['groq_model'],
-                "temperature": 0.7,
-                "max_tokens": 500,
+                "temperature": 0.2,  # Stark reduziert für weniger Halluzinationen
+                "max_tokens": 600,   # Optimiert für fokussierte Antworten
+                "top_p": 0.7,        # Noch fokussiertere Antworten
+                "frequency_penalty": 0.3,  # Erhöht gegen Wiederholungen
+                "presence_penalty": 0.1,   # Gegen redundante Inhalte
                 "stream": False
             }
             

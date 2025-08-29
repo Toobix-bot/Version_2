@@ -29,30 +29,48 @@ class ToobixAssistant:
         self.speech_engine = SpeechEngine(self.settings)
         self.desktop = DesktopIntegration()
         
-        # GUI erstellen - Phase 4 Version verwenden
-        from toobix.gui.main_window import ToobixGUI
-        self.gui = ToobixGUI(
-            ai_handler=self.ai_handler,
-            speech_engine=self.speech_engine,
-            desktop=self.desktop,
-            settings=self.settings
-        )
+        # GUI erstellen - NEUE MODERNE VERSION
+        try:
+            from toobix.gui.modern_gui import create_modern_gui
+            self.gui = create_modern_gui(
+                ai_handler=self.ai_handler,
+                speech_engine=self.speech_engine,
+                desktop=self.desktop,
+                settings=self.settings
+            )
+            print("🌟 Moderne GUI aktiviert!")
+        except Exception as e:
+            print(f"⚠️ Fallback zur klassischen GUI: {e}")
+            # Fallback zur alten GUI
+            from toobix.gui.main_window import ToobixGUI
+            self.gui = ToobixGUI(
+                ai_handler=self.ai_handler,
+                speech_engine=self.speech_engine,
+                desktop=self.desktop,
+                settings=self.settings
+            )
         
         print("✅ Toobix ist bereit!")
     
     def run(self):
         """Startet die Hauptanwendung"""
         try:
-            # GUI starten (Hauptthread) - Speech Engine wird von GUI verwaltet
-            print("✅ Toobix ist bereit!")
-            
-            # TTS nur einmal beim Start
-            try:
-                self.speech_engine.speak("Toobix Optimized ist bereit!", wait=False)
-            except:
-                print("🔇 TTS beim Start nicht verfügbar")
-            
-            self.gui.run()
+            # GUI starten - Check welche GUI verwendet wird
+            if hasattr(self.gui, 'run'):
+                # Moderne GUI
+                print("🌟 Starte moderne GUI...")
+                self.gui.run()
+            else:
+                # Klassische GUI
+                print("🎨 GUI gestartet - Toobix ist bereit!")
+                
+                # TTS nur einmal beim Start
+                try:
+                    self.speech_engine.speak("Toobix Optimized ist bereit!", wait=False)
+                except:
+                    print("🔇 TTS beim Start nicht verfügbar")
+                
+                self.gui.run()
             
         except KeyboardInterrupt:
             print("\n👋 Toobix wird beendet...")
